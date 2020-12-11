@@ -218,7 +218,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>maven-clean-plugin</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
 				<version>3.1.0</version>
 				<configuration>
 					<filesets>

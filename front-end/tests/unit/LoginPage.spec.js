@@ -1,4 +1,3 @@
-import { shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import LoginPage from '@/views/LoginPage'
 
