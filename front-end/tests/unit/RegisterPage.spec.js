@@ -1,5 +1,15 @@
-import { mount } from '@vue/test-utils'
+import { mount, createLocalVue } from '@vue/test-utils'
 import RegisterPage from '@/views/RegisterPage'
+import VueRouter from 'vue-router'
+
+// vm.$router에 접근할 수 있도록
+// 테스트에 Vue Router 추가하기
+const localVue = createLocalVue()
+localVue.use(VueRouter)
+const router = new VueRouter()
+
+// registrationService의 mock
+jest.mock('@/services/registration')
 
 describe('RegisterPage.vue', () => {
     let wrapper
@@ -9,11 +19,18 @@ describe('RegisterPage.vue', () => {
     let buttonSubmit
 
     beforeEach(() => {
-        wrapper = mount(RegisterPage)
+        wrapper = mount(RegisterPage,{
+            localVue,
+            router
+        })
         fieldUsername = wrapper.find('#username')
         fieldEmailAddress = wrapper.find('#emailAddress')
         fieldPassword = wrapper.find('#password')
         buttonSubmit = wrapper.find('form button[type="submit"]')
+    })
+
+    afterAll(() => {
+        jest.restoreAllMocks
     })
 
     it('should render correct contents', () => {
@@ -61,6 +78,28 @@ describe('RegisterPage.vue', () => {
         wrapper.setMethods({submitForm: stub})
         buttonSubmit.trigger('submit')
         expect(stub).toBeCalled()
+    })
+
+    it('should register when it is a new user', () => {
+        const stub = jest.fn()
+        wrapper.vm.$router.push = stub
+        wrapper.vm.form.username = 'sunny'
+        wrapper.vm.form.emailAddress = 'sunny@taskagile.com'
+        wrapper.vm.form.password = 'JestRocks'
+        wrapper.vm.submitForm()
+        wrapper.vm.$nextTick(() => {
+            expect(stub).toHaveBeenCalledWith({name: 'LoginPage'})
+        })
+    })
+
+    it('should fail it is not a new user', () => {
+        // 목에서는 오직 sunny@taskagile.com만 새로운 사용자다
+        wrapper.vm.form.emailAddress = 'ted@local'
+        expect(wrapper.find('.failed').isVisible()).toBe(false)
+        wrapper.vm.submitForm()
+        wrapper.vm.$nextTick(null, () => {
+            expect(wrapper.find('.failed').isVisible()).toBe(true)
+        })
     })
 
 
