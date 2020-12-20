@@ -1,11 +1,13 @@
 import { mount, createLocalVue } from '@vue/test-utils'
 import RegisterPage from '@/views/RegisterPage'
 import VueRouter from 'vue-router'
+import Vuelidate from 'vuelidate'
 
 // vm.$router에 접근할 수 있도록
 // 테스트에 Vue Router 추가하기
 const localVue = createLocalVue()
 localVue.use(VueRouter)
+localVue.use(Vuelidate)
 const router = new VueRouter()
 
 // registrationService의 mock
@@ -100,6 +102,15 @@ describe('RegisterPage.vue', () => {
         wrapper.vm.$nextTick(null, () => {
             expect(wrapper.find('.failed').isVisible()).toBe(true)
         })
+    })
+
+    it('should fail when the email address is invalid', () => {
+        const spy = jext.spyOn(registrationService, 'register')
+        wrapper.vm.form.emailAddress = 'bad-email-address'
+        wrapper.vm.submitForm()
+        expect(spy).not.toHaveBeenCalled()
+        spy.mockReset()
+        spy.mockRestore()
     })
 
 
