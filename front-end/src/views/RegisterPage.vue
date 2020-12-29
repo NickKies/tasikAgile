@@ -3,7 +3,7 @@
     <div class="row justify-content-center">
       <div class="register-form">
         <div class="logo-wrapper">
-          <img class="logo" src="/static/images/logo.png">
+          <img class="logo" src="../../../src/main/resources/static/images/logo.png">
           <div class="tagline">Open source task management tool</div>
         </div>
         <form @submit.prevent="submitForm">
@@ -15,7 +15,7 @@
               <div class="error" v-if="!$v.form.username.required">Username is required</div>
               <div class="error" v-if="!$v.form.username.alphaNum">Username can only contain letters and numbers</div>
               <div class="error" v-if="!$v.form.username.minLength">Username must have at least {{$v.form.username.$params.minLength.min}} letters.</div>
-              <div class="error" v-if="!$v.form.username.maxLength">Username is too long. It can contains maximium {{$v.form.username.$params.maxLength.max}} letters.</div>
+              <div class="error" v-if="!$v.form.username.maxLength">Username is too long. It can contains maximum {{$v.form.username.$params.maxLength.max}} letters.</div>
             </div>
           </div>
           <div class="form-group">
@@ -24,7 +24,7 @@
             <div class="field-error" v-if="$v.form.emailAddress.$dirty">
               <div class="error" v-if="!$v.form.emailAddress.required">Email address is required</div>
               <div class="error" v-if="!$v.form.emailAddress.email">This is not a valid email address</div>
-              <div class="error" v-if="!$v.form.emailAddress.maxLength">Email address is too long. It can contains maximium {{$v.form.emailAddress.$params.maxLength.max}} letters.</div>
+              <div class="error" v-if="!$v.form.emailAddress.maxLength">Email address is too long. It can contains maximum {{$v.form.emailAddress.$params.maxLength.max}} letters.</div>
             </div>
           </div>
           <div class="form-group">
@@ -33,7 +33,7 @@
             <div class="field-error" v-if="$v.form.password.$dirty">
               <div class="error" v-if="!$v.form.password.required">Password is required</div>
               <div class="error" v-if="!$v.form.password.minLength">Password is too short. It can contains at least {{$v.form.password.$params.minLength.min}} letters.</div>
-              <div class="error" v-if="!$v.form.password.maxLength">Password is too long. It can contains maximium {{$v.form.password.$params.maxLength.max}} letters.</div>
+              <div class="error" v-if="!$v.form.password.maxLength">Password is too long. It can contains maximum {{$v.form.password.$params.maxLength.max}} letters.</div>
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block">Create account</button>
