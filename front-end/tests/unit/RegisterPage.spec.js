@@ -2,15 +2,16 @@ import { mount, createLocalVue } from '@vue/test-utils'
 import RegisterPage from '@/views/RegisterPage'
 import VueRouter from 'vue-router'
 import Vuelidate from 'vuelidate'
+import registrationService from '@/services/registration'
 
-// vm.$router에 접근할 수 있도록
-// 테스트에 Vue Router 추가하기
+// Adding Vue Router to the test so that
+// we can access vm.$router
 const localVue = createLocalVue()
 localVue.use(VueRouter)
 localVue.use(Vuelidate)
 const router = new VueRouter()
 
-// registrationService의 mock
+// Mock dependency registratioService
 jest.mock('@/services/registration')
 
 describe('RegisterPage.vue', () => {
@@ -19,9 +20,10 @@ describe('RegisterPage.vue', () => {
     let fieldEmailAddress
     let fieldPassword
     let buttonSubmit
+    let registerSpy
 
     beforeEach(() => {
-        wrapper = mount(RegisterPage,{
+        wrapper = mount(RegisterPage, {
             localVue,
             router
         })
@@ -29,31 +31,28 @@ describe('RegisterPage.vue', () => {
         fieldEmailAddress = wrapper.find('#emailAddress')
         fieldPassword = wrapper.find('#password')
         buttonSubmit = wrapper.find('form button[type="submit"]')
+        // Create spy for registration service
+        registerSpy = jest.spyOn(registrationService, 'register')
+    })
+
+    afterEach(() => {
+        registerSpy.mockReset()
+        registerSpy.mockRestore()
     })
 
     afterAll(() => {
-        jest.restoreAllMocks
+        jest.restoreAllMocks()
     })
 
-    it('should render correct contents', () => {
-        expect(wrapper.find('.logo').attributes().src).toEqual('/static/images/logo.png')
-        expect(wrapper.find('.tagline').text()).toEqual('Open source task management tool')
+    it('should render registration form', () => {
+        expect(wrapper.find('.logo').attributes().src)
+            .toEqual('/static/images/logo.png')
+        expect(wrapper.find('.tagline').text())
+            .toEqual('Open source task management tool')
         expect(fieldUsername.element.value).toEqual('')
         expect(fieldEmailAddress.element.value).toEqual('')
         expect(fieldPassword.element.value).toEqual('')
         expect(buttonSubmit.text()).toEqual('Create account')
-
-/*        const Constructor = Vue.extend(RegisterPage)
-        const vm = new Constructor().$mount()
-        expect(vm.$el.querySelector('.logo').getAttribute('src'))
-            .toEqual('/static/images/logo.png')
-        expect(vm.$el.querySelector('.tagline').textContent)
-            .toEqual('Open source task management tool')
-        expect(vm.$el.querySelector('#username').value).toEqual('')
-        expect(vm.$el.querySelector('#emailAddress').value).toEqual('')
-        expect(vm.$el.querySelector('#password').value).toEqual('')
-        expect(vm.$el.querySelector('form button[type="submit"]').textContent)
-            .toEqual('Create account')*/
     })
 
     it('should contain data model with initial values', () => {
@@ -82,36 +81,53 @@ describe('RegisterPage.vue', () => {
         expect(stub).toBeCalled()
     })
 
-    it('should register when it is a new user', () => {
+    it('should register when it is a new user', async () => {
+        expect.assertions(2)
         const stub = jest.fn()
         wrapper.vm.$router.push = stub
         wrapper.vm.form.username = 'sunny'
         wrapper.vm.form.emailAddress = 'sunny@taskagile.com'
-        wrapper.vm.form.password = 'JestRocks'
+        wrapper.vm.form.password = 'JestRocks!'
         wrapper.vm.submitForm()
-        wrapper.vm.$nextTick(() => {
-            expect(stub).toHaveBeenCalledWith({name: 'LoginPage'})
-        })
+        expect(registerSpy).toBeCalled()
+        await wrapper.vm.$nextTick()
+        expect(stub).toHaveBeenCalledWith({name: 'LoginPage'})
     })
 
-    it('should fail it is not a new user', () => {
-        // 목에서는 오직 sunny@taskagile.com만 새로운 사용자다
-        wrapper.vm.form.emailAddress = 'ted@local'
+/*    it('should fail it is not a new user', async () => {
+        expect.assertions(3)
+        // In the mock, only sunny@taskagile.com is new user
+        wrapper.vm.form.username = 'ted'
+        wrapper.vm.form.emailAddress = 'ted@taskagile.com'
+        wrapper.vm.form.password = 'JestRocks!'
         expect(wrapper.find('.failed').isVisible()).toBe(false)
         wrapper.vm.submitForm()
-        wrapper.vm.$nextTick(null, () => {
-            expect(wrapper.find('.failed').isVisible()).toBe(true)
-        })
-    })
-
-/*    it('should fail when the email address is invalid', () => {
-        const spy = jest.spyOn(registrationService, 'register')
-        wrapper.vm.form.emailAddress = 'bad-email-address'
-        wrapper.vm.submitForm()
-        expect(spy).not.toHaveBeenCalled()
-        spy.mockReset()
-        spy.mockRestore()
+        expect(registerSpy).toBeCalled()
+        await wrapper.vm.$nextTick()
+        expect(wrapper.find('.failed').isVisible()).toBe(true)
     })*/
 
+    it('should fail when the email address is invalid', () => {
+        wrapper.vm.form.username = 'test'
+        wrapper.vm.form.emailAddress = 'bad-email-address'
+        wrapper.vm.form.password = 'JestRocks!'
+        wrapper.vm.submitForm()
+        expect(registerSpy).not.toHaveBeenCalled()
+    })
 
+    it('should fail when the username is invalid', () => {
+        wrapper.vm.form.username = 'a'
+        wrapper.vm.form.emailAddress = 'test@taskagile.com'
+        wrapper.vm.form.password = 'JestRocks!'
+        wrapper.vm.submitForm()
+        expect(registerSpy).not.toHaveBeenCalled()
+    })
+
+    it('should fail when the password is invalid', () => {
+        wrapper.vm.form.username = 'test'
+        wrapper.vm.form.emailAddress = 'test@taskagile.com'
+        wrapper.vm.form.password = 'bad!'
+        wrapper.vm.submitForm()
+        expect(registerSpy).not.toHaveBeenCalled()
+    })
 })
