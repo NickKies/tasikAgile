@@ -1,7 +1,9 @@
 package com.taskagile.web.apis;
 
 import com.taskagile.domain.application.UserService;
+import com.taskagile.domain.model.user.EmailAddressExistsException;
 import com.taskagile.domain.model.user.RegistrationException;
+import com.taskagile.domain.model.user.UsernameExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +22,7 @@ public class RegistrationApiController {
             service.register(payload.toCommand());
             return Result.created();
         } catch (RegistrationException e) {
-            String errorMessage = "Registraion failed";
+            String errorMessage = "Registration failed";
             if ( e instanceof UsernameExistsException) {
                 errorMessage = "Username already exists";
             } else if ( e instanceof EmailAddressExistsException) {
